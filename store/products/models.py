@@ -1,4 +1,7 @@
+from django.contrib.auth import get_user_model
 from django.db import models
+
+User = get_user_model()
 
 
 class ProductCategory(models.Model):
@@ -23,3 +26,15 @@ class Product(models.Model):
 
     def __str__(self):
         return f'Продукт {self.name} | категория {self.category.name}'
+
+
+class Basket(models.Model):
+    """Карзина покупок."""
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveSmallIntegerField(default=0)
+    created_timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f'корзина пользователя: {self.user.username}'
