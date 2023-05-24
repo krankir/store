@@ -1,7 +1,9 @@
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 
+from django.core.paginator import Paginator
 from products.models import Product, ProductCategory, Basket
 
 User = get_user_model()
@@ -14,18 +16,23 @@ def index(request):
     return render(request, 'products/index.html', context)
 
 
-def products(request):
-    print(request)
-    object_list = Product.objects.all
-    category_list = ProductCategory.objects.all()
+def products(request, category_id=None, page_number=1):
+    if category_id:
+        products = Product.objects.filter(category_id=category_id)
+
+    else:
+        products = Product.objects.all()
+    paginator = Paginator(products, 3)
+    products_paginator = paginator.page(page_number)
     context = {
         'title': 'TEST TITLE',
-        'object_list': object_list,
-        'category': category_list,
+        'category': ProductCategory.objects.all(),
+        'products': products_paginator
     }
     return render(request, 'products/products.html', context)
 
 
+@login_required
 def basket_add(request, product_id):
     product = Product.objects.get(id=product_id)
     baskets = Basket.objects.filter(user=request.user, product=product)
